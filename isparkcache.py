@@ -355,7 +355,7 @@ class ISparkCacheMagics(Magics, Configurable):
               "raising an error if the file does not exist.")
     )
     @cell_magic
-    def isparkcache(self, line, cell):
+    def sparkcache(self, line, cell):
         """Cache user variables in a file, and skip the cell if the cached
         variables exist.
 
@@ -371,7 +371,7 @@ class ISparkCacheMagics(Magics, Configurable):
 
         """
         ip = self.shell
-        args = magic_arguments.parse_argstring(self.isparkcache, line)
+        args = magic_arguments.parse_argstring(self.sparkcache, line)
         code = cell if cell.endswith('\n') else cell + '\n'
         vars = clean_vars(args.vars)
 
