@@ -25,12 +25,12 @@ except Exception:
     fs = LocalFSClient()
 
 # Our own
-from IPython.config.configurable import Configurable
 from IPython.core import magic_arguments
 from IPython.core.magic import Magics, magics_class, cell_magic
 from IPython.display import clear_output
 from IPython.utils.io import CapturedIO
-from IPython.utils.traitlets import Unicode
+from traitlets.config import Configurable
+from traitlets import Unicode
 
 # ------------------------------------------------------------------------------
 # Six utility functions for Python 2/3 compatibility
@@ -125,11 +125,11 @@ def do_save(path, force=False, read=False):
 
 
 def load_vars(sql, path, vars):
-    """Load variables from a orc file.
+    """Load variables from a parquet file.
 
     Arguments:
 
-      * path: the path to the orc file.
+      * path: the path to the parquet file.
       * vars: a list of variable names.
 
     Returns:
@@ -140,7 +140,7 @@ def load_vars(sql, path, vars):
     cache_vars = {}
     for var in vars:
         try:
-            cache_vars[var] = sql.read.orc(join(path, var))
+            cache_vars[var] = sql.read.parquet(join(path, var))
         except Exception as e:
             raise ValueError("The following variables could not be loaded "
                              "from the cache: {0:s}".format(var))
@@ -148,16 +148,16 @@ def load_vars(sql, path, vars):
 
 
 def save_vars(path, vars_d):
-    """Save variables into a orc file.
+    """Save variables into a parquet file.
 
     Arguments:
 
-      * path: the path to the orc file.
+      * path: the path to the parquet file.
       * vars_d: a dictionary {var_name: var_value}.
 
     """
     for var_name, var_value in vars_d.iteritems():
-        var_value.write.orc(join(path, var_name), mode="overwrite")
+        var_value.write.parquet(join(path, var_name), mode="overwrite")
 
 
 # ------------------------------------------------------------------------------
@@ -312,7 +312,7 @@ def cache(cell, path, sql, vars=[],
         ip_push(cached)
         if verbose:
             print(("[Skipped the cell's code and loaded variables {0:s} "
-                   "from file '{1:s}'.]").format(', '.join(vars), path))
+                   "from directory '{1:s}'.]").format(', '.join(vars), path))
 
     # Display the outputs, whether they come from the cell's execution
     # or the pickle file.
@@ -321,7 +321,7 @@ def cache(cell, path, sql, vars=[],
 
 
 @magics_class
-class ISparkCacheMagics(Magics, Configurable):
+class SparkCacheMagics(Magics, Configurable):
     """Variable caching.
 
     Provides the %cache magic."""
@@ -361,18 +361,17 @@ class ISparkCacheMagics(Magics, Configurable):
 
         Usage:
 
-            %%cache myfile.pkl var1 var2
-            # If myfile.pkl doesn't exist, this cell is executed and
-            # var1 and var2 are saved in this file.
+            %%sparkcache df1 df2
+            # If /user/$USER/sparkcache/<AppName>/df1 or /user/$USER/sparkcache/<AppName>/df2 doesn't exist, this cell is executed and
+            # df1 and df2 are saved in this directories as Parquet.
             # Otherwise, the cell is skipped and these variables are
             # injected from the file to the interactive namespace.
-            var1 = ...
-            var2 = ...
+            df1 = ...
+            df2 = ...
 
         """
         ip = self.shell
         args = magic_arguments.parse_argstring(self.sparkcache, line)
-        code = cell if cell.endswith('\n') else cell + '\n'
         vars = clean_vars(args.vars)
 
         # The cachedir can be specified with --cachedir or inferred from the
@@ -399,4 +398,4 @@ class ISparkCacheMagics(Magics, Configurable):
 
 def load_ipython_extension(ip):
     """Load the extension in IPython."""
-    ip.register_magics(ISparkCacheMagics)
+    ip.register_magics(SparkCacheMagics)
