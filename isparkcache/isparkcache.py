@@ -15,8 +15,8 @@ import sys
 import warnings
 from os.path import join
 
-from fs.hdfs import HDFSClient
-from fs.local import LocalFSClient
+from .fs.hdfs import HDFSClient
+from .fs.local import LocalFSClient
 
 try:
     fs = HDFSClient()

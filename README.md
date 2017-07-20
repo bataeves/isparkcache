@@ -1,5 +1,3 @@
-==================
-
 Defines a **%%sparkcache** cell magic in the IPython notebook to cache DataFrame
 and outputs of long-lasting computations in a persistent Parquet file in Hadoop.
 Useful when some computations in a notebook are long and you want to
@@ -17,13 +15,11 @@ Usage
 
 -  In IPython/Jupyter:
 
-   ::
 
        %load_ext isparkcache
 
 -  Then, create a cell with:
 
-   ::
 
        %%sparkcache df1 df2
        df = ...
@@ -53,7 +49,6 @@ Usage
    ``~\.ipython\profile_default\ipython_config.py``) by adding the
    following line:
 
-   ::
 
        c.SparkCacheMagics.cachedir = "/path/to/mycache"
 
