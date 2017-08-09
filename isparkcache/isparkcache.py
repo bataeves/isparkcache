@@ -284,11 +284,18 @@ def cache(cell, path, sql, vars=[],
                                           for _ in vars_missing])
             raise ValueError(("Variable(s) {0:s} could not be found in the "
                               "interactive namespace").format(vars_missing_str))
-        # Save the cache in the pickle file.
+        # Save the cache in the parquet file.
         save_vars(path, cached)
+
+        # Load DataFrames from cache, to skip execution
+        # Push the remaining variables in the namespace.
+        cached = load_vars(sql, path, vars)
+        ip_push(cached)
         ip_clear_output()  # clear away the temporary output and replace with the saved output (ideal?)
         if verbose:
             print("[Saved variables '{0:s}' to directory '{1:s}'.]".format(', '.join(vars), path))
+            print(("[ReLoaded variables {0:s} "
+                   "from directory '{1:s}'.]").format(', '.join(vars), path))
 
     # If the cache file exists, and no --force mode, load the requested
     # variables from the specified file into the interactive namespace.
